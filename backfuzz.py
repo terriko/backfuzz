@@ -1,9 +1,6 @@
 import time, sys, dircache
 from functions import *
 
-# Back to the FUZZ'er - protocol fuzzing toolkit
-# Follow: @mattdch - www.localh0t.com.ar
-
 VERSION = "0.1"
 
 # Plugin read class
