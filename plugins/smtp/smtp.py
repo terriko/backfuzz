@@ -28,7 +28,7 @@ class FuzzerClass:
 		# Stage 3
 		sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
 		sendCredential(sock,"HELO","localh0t",timeout)
-		fuzzCommands(sock,host,port,"SMTP",minim,maxm,salt,timeout,stage_3)
+		fuzzCommands(sock,host,port,"SMTP",minim,maxm,salt,timeout,stage_3,0,"SingleCommand")
 		# Stage 4
 		sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
 		sendCredential(sock,"HELO","localh0t",timeout)
