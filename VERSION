@@ -1,0 +1,10 @@
+v0.1.1:
+=======
+
+Fixed fuzzCommands() issue with smtp plugin (thanks John)
+
+
+v0.1:
+=====
+
+First public version.
