@@ -1,7 +1,7 @@
 v0.1.2:
 =======
 
-Improved FTP plugin due massive broken pipe messages. Also added LOGIN in the SMTP Fuzzer plugin.
+Improved FTP plugin due massive broken pipe messages. Also added LOGIN feature in the SMTP Fuzzer plugin.
 
 
 v0.1.1:
