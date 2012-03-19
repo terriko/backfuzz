@@ -22,5 +22,14 @@ class FuzzerClass:
 		sock = createSocketTCP(host,port,"FTP",0,0,timeout)
 		sendCredential(sock,"USER",username,timeout)
 		sendCredential(sock,"PASS",password,timeout)
-		fuzzCommands(sock,host,port,"FTP",minim,maxm,salt,timeout,commands,0,"SingleCommand")
+		for command in commands:
+			printCommand(command)
+			for length in range(minim, maxm+1, salt):
+				payloadCount(minim,maxm,length)
+				pattern = createPattern(length)
+				pattern = addCommandPattern(command,0,pattern)
+				sock = createSocketTCP(host,port,"FTP",pattern,length,timeout)
+				sendCredential(sock,"USER",username,timeout)
+				sendCredential(sock,"PASS",password,timeout)
+				sendDataTCP(sock,host,port,"FTP",pattern,length,timeout,1)
 		exitProgram(2)

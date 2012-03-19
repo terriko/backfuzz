@@ -16,6 +16,7 @@ special_stages = ['AUTH LOGIN','AUTH CRAM-MD5','AUTH CRAM-SHA1']
 
 class FuzzerClass:
 	def fuzzer(self,host,port,minim,maxm,salt,timeout):
+		(username,password) = createUser()
 		# Stage 0
 		fuzzTCP(host,port,minim,maxm,salt,timeout,"SMTP")
 		# Stage 1
@@ -24,19 +25,31 @@ class FuzzerClass:
 		# Stage 2
 		sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
 		sendCredential(sock,"HELO","localh0t",timeout)
+		sendCredential(sock,"AUTH LOGIN","",timeout)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(username),0,timeout,0)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(password),0,timeout,0)
 		fuzzCommands(sock,host,port,"SMTP",minim,maxm,salt,timeout,stage_2,0,"Email")
 		# Stage 3
 		sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
 		sendCredential(sock,"HELO","localh0t",timeout)
+		sendCredential(sock,"AUTH LOGIN","",timeout)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(username),0,timeout,0)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(password),0,timeout,0)
 		fuzzCommands(sock,host,port,"SMTP",minim,maxm,salt,timeout,stage_3,0,"SingleCommand")
 		# Stage 4
 		sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
 		sendCredential(sock,"HELO","localh0t",timeout)
+		sendCredential(sock,"AUTH LOGIN","",timeout)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(username),0,timeout,0)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(password),0,timeout,0)
 		sendCredential(sock,"MAIL From:","backfuzz@localh0t.com.ar",timeout)
 		fuzzCommands(sock,host,port,"SMTP",minim,maxm,salt,timeout,stage_4,0,"Email")
 		# Stage 5
 		sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
 		sendCredential(sock,"EHLO","localh0t",timeout)
+		sendCredential(sock,"AUTH LOGIN","",timeout)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(username),0,timeout,0)
+		sendDataTCP(sock,host,port,"SMTP",base64.b64encode(password),0,timeout,0)
 		sendCredential(sock,"MAIL From:","<backfuzz@localh0t.com.ar>",timeout)
 		sendCredential(sock,"RCPT To:","<null@fuzz.com>",timeout)
 		fuzzCommands(sock,host,port,"SMTP",minim,maxm,salt,timeout,stage_5,0,"SingleCommand")
