@@ -58,7 +58,7 @@ def fuzzUDP(host,port,minim,maxm,salt,timeout,prot):
 			payloadCount(minim,maxm,length)			
 			pattern = createPattern(length)
 			sock = createSocketUDP(host,port,prot,pattern,length,timeout)
-			sendDataUDP(sock,host,port,prot,pattern,length,timeout,1)
+			sendDataUDP(sock,host,port,prot,pattern,pattern,length,timeout,1)
 
 ###################################################################################
 
@@ -162,7 +162,7 @@ def createSocketUDP(host,port,prot,pattern,length,timeout):
 		print "[!] Another socket error, the service almost certainly crashed"
 		showPayload(host,port,prot,pattern,length)
 
-def sendDataUDP(sock,host,port,prot,pattern,length,timeout,close):
+def sendDataUDP(sock,host,port,prot,pattern,spattern,length,timeout,close):
 	try:
 		time.sleep(timeout)
 		sock.settimeout(timeout)
@@ -178,10 +178,10 @@ def sendDataUDP(sock,host,port,prot,pattern,length,timeout,close):
 		error = err[0]
 		if error == errno.ECONNREFUSED:
 			print "\n[!] We got a connection refused, the service almost certainly crashed"
-			showPayload(host,port,prot,pattern,length)
+			showPayload(host,port,prot,spattern,length)
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
-		showPayload(host,port,prot,pattern,length)
+		showPayload(host,port,prot,spattern,length)
 
 ###################################################################################
 
@@ -193,8 +193,9 @@ def sendCredential(sock,command,login,timeout):
 		exitProgram(5)
 
 def checkDefaultUser(username,password):
-	if username == '' and password == '':
+	if username == '':
 		username = "anonymous"
+	if password == '':
 		password = "anonymous@test.com"
 	else:
 		pass
