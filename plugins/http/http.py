@@ -20,6 +20,7 @@ headers = [
 			'X-Forwared-For:',
 			'Content-Type:',
 			'Content-Length:',
+			'If-Modified-Since:',
 ]
 
 class FuzzerClass:
