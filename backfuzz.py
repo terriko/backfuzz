@@ -6,7 +6,7 @@ from functions import *
 # Follow: @mattdch
 # Blog: www.localh0t.com.ar
 
-VERSION = "0.1.2"
+VERSION = "0.2"
 
 # Plugin read class
 class Plugins:
