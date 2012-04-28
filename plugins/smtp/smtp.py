@@ -57,11 +57,11 @@ class FuzzerClass:
 		for command in special_stages:
 			printCommand(command)
 			for length in range(minim, maxm+1 ,salt):
-				sock = createSocketTCP(host,port,"SMTP",0,0,timeout)
-				sendCredential(sock,"EHLO","localh0t",timeout)
+			 	pattern = base64.b64encode(createPattern(length))	
+			 	payloadCount(minim,maxm,length)	
+ 				sock = createSocketTCP(host,port,"SMTP",pattern,length,timeout)
+ 				sendCredential(sock,"EHLO","localh0t",timeout)
 				sendCredential(sock,command,"",timeout)
-				payloadCount(minim,maxm,length)			
- 				pattern = base64.b64encode(createPattern(length))
 				if command == 'AUTH LOGIN':
 					sendDataTCP(sock,host,port,"SMTP",pattern,length,timeout,0)
 				sendDataTCP(sock,host,port,"SMTP",pattern,length,timeout,1)
