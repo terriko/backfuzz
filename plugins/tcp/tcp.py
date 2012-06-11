@@ -7,6 +7,6 @@ PROPERTY['DESC']="Send garbage to a TCP connection "
 PROPERTY['AUTHOR']='localh0t'
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
-		fuzzTCP(host,port,minim,maxm,salt,timeout,"TCP")
+	def fuzzer(self):
+		fuzzTCP()
 		exitProgram(2)

@@ -1,4 +1,4 @@
-import sys,socket,select,time,errno,base64
+import sys,socket,select,time,errno,base64,random,globalvars
 
 ###################################################################################
 
@@ -23,42 +23,42 @@ def fileInput(message):
 
 ###################################################################################
 
-def fuzzUser(host,port,minim,maxm,salt,timeout,user,prot):
+def fuzzUser(user):
 	printCommand(user)
-	for length in range(minim, maxm+1, salt):
-		payloadCount(minim,maxm,length)			
+	for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+		payloadCount(length)			
 		pattern = createPattern(length)
 		pattern = addCommandPattern(user,0,pattern) 
-		sock = createSocketTCP(host,port,prot,pattern,length,timeout)
-		sendDataTCP(sock,host,port,prot,pattern,length,timeout,1)
+		sock = createSocketTCP(pattern,length)
+		sendDataTCP(sock,pattern,length,1)
 
-def fuzzPass(host,port,minim,maxm,salt,timeout,username,user,passwd,prot):
+def fuzzPass(username,user,passwd):
 	printCommand(passwd)
-	for length in range(minim, maxm+1, salt):
-		payloadCount(minim,maxm,length)
+	for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+		payloadCount(length)
 		pattern = createPattern(length)
 		pattern = addCommandPattern(passwd,0,pattern)
-		sock = createSocketTCP(host,port,prot,pattern,length,timeout)
+		sock = createSocketTCP(pattern,length)
 		sendCredential(sock,user,username,timeout)
-		sendDataTCP(sock,host,port,prot,pattern,length,timeout,1)
+		sendDataTCP(sock,pattern,length,1)
 
 ###################################################################################
 
-def fuzzTCP(host,port,minim,maxm,salt,timeout,prot):
+def fuzzTCP():
 		printCommand("TCP Socket")
-		for length in range(minim, maxm+1, salt):
-			payloadCount(minim,maxm,length)			
+		for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+			payloadCount(length)			
 			pattern = createPattern(length)
-			sock = createSocketTCP(host,port,prot,pattern,length,timeout)
-			sendDataTCP(sock,host,port,prot,pattern,length,timeout,1)
+			sock = createSocketTCP(pattern,length)
+			sendDataTCP(sock,pattern,length,1)
 
-def fuzzUDP(host,port,minim,maxm,salt,timeout,prot):
+def fuzzUDP():
 		printCommand("UDP Socket")
-		for length in range(minim, maxm+1, salt):
-			payloadCount(minim,maxm,length)			
+		for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+			payloadCount(length)			
 			pattern = createPattern(length)
-			sock = createSocketUDP(host,port,prot,pattern,length,timeout)
-			sendDataUDP(sock,host,port,prot,pattern,pattern,length,timeout,1)
+			sock = createSocketUDP(pattern,length)
+			sendDataUDP(sock,pattern,pattern,length,1)
 
 ###################################################################################
 
@@ -78,11 +78,11 @@ def addDoubleCommandNoSpace(command,endcommand,pattern):
     return (str(command) + str(pattern) + " " + str(endcommand))
 
 
-def fuzzCommands(sock,host,port,prot,minim,maxm,salt,timeout,commands,endcommand,type):
+def fuzzCommands(sock,commands,endcommand,type):
 	for i in range(0,len(commands)):
 		printCommand(commands[i])
-		for length in range(minim, maxm+1, salt):
-			payloadCount(minim,maxm,length)
+		for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+			payloadCount(length)
 			pattern = createPattern(length)
 			Switch = { 
 			"SingleCommand":addCommandPattern,
@@ -92,19 +92,19 @@ def fuzzCommands(sock,host,port,prot,minim,maxm,salt,timeout,commands,endcommand
 			"DoubleCommandNoSpace":addDoubleCommandNoSpace 
 			}
  			pattern = Switch[type](commands[i],endcommand,pattern)
-			if i == (len(commands) - 1) and (length+salt) > maxm:
-				sendDataTCP(sock,host,port,prot,pattern,length,timeout,1)
+			if i == (len(commands) - 1) and (length+globalvars.salt) > globalvars.maxm:
+				sendDataTCP(sock,pattern,length,1)
 			else:
-				sendDataTCP(sock,host,port,prot,pattern,length,timeout,0)
+				sendDataTCP(sock,pattern,length,0)
 
 
 ###################################################################################
 
-def createSocketTCP(host,port,prot,pattern,length,timeout):
+def createSocketTCP(pattern,length):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.settimeout(timeout)
-		sock.connect((host, port))
+		sock.settimeout(globalvars.timeout)
+		sock.connect((globalvars.host, globalvars.port))
 		return sock
 	except KeyboardInterrupt:
 		exitProgram(6)
@@ -112,15 +112,15 @@ def createSocketTCP(host,port,prot,pattern,length,timeout):
 		error = err[0]
 		if error == errno.ECONNREFUSED:
 			print "[!] We got a connection refused, the service almost certainly crashed"
-			showPayload(host,port,prot,pattern,length)
+			showPayload(pattern,length)
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
-		showPayload(host,port,prot,pattern,length)
+		showPayload(pattern,length)
 
-def sendDataTCP(sock,host,port,prot,pattern,length,timeout,close):
+def sendDataTCP(sock,pattern,length,close):
 	try:
-		time.sleep(timeout)
-		sock.settimeout(timeout)
+		time.sleep(globalvars.timeout)
+		sock.settimeout(globalvars.timeout)
 		pattern = pattern + "\r\n"
 		sock.send(pattern)
 		sock.recv(4096)
@@ -134,22 +134,22 @@ def sendDataTCP(sock,host,port,prot,pattern,length,timeout,close):
 		error = err[0]
 		if error == errno.EPIPE:
 			print "\n[!] We got a broken pipe, that is a *possible* crash. Checking if it really crashed ..."
-			check_conn = createSocketTCP(host,port,prot,pattern,length,timeout)
+			check_conn = createSocketTCP(pattern,length)
 			print "[!] The service has not really crashed, continuing fuzzing ...\n"
 		if error == errno.ECONNREFUSED:
 			print "\n[!] We got a connection refused, the service almost certainly crashed"
-			showPayload(host,port,prot,pattern,length)
+			showPayload(pattern,length)
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
-		showPayload(host,port,prot,pattern,length)
+		showPayload(pattern,length)
 
 ###################################################################################
 
-def createSocketUDP(host,port,prot,pattern,length,timeout):
+def createSocketUDP(pattern,length):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		sock.settimeout(timeout)
-		sock.connect((host, port))
+		sock.settimeout(globalvars.timeout)
+		sock.connect((globalvars.host, globalvars.port))
 		return sock
 	except KeyboardInterrupt:
 		exitProgram(6)
@@ -157,15 +157,15 @@ def createSocketUDP(host,port,prot,pattern,length,timeout):
 		error = err[0]
 		if error == errno.ECONNREFUSED:
 			print "\n[!] We got a connection refused, the service almost certainly crashed"
-			showPayload(host,port,prot,pattern,length)
+			showPayload(pattern,length)
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
-		showPayload(host,port,prot,pattern,length)
+		showPayload(pattern,length)
 
-def sendDataUDP(sock,host,port,prot,pattern,spattern,length,timeout,close):
+def sendDataUDP(sock,pattern,spattern,length,close):
 	try:
-		time.sleep(timeout)
-		sock.settimeout(timeout)
+		time.sleep(globalvars.timeout)
+		sock.settimeout(globalvars.timeout)
 		sock.send(pattern)
 		sock.recv(4096)
 		if close == 1:
@@ -178,14 +178,14 @@ def sendDataUDP(sock,host,port,prot,pattern,spattern,length,timeout,close):
 		error = err[0]
 		if error == errno.ECONNREFUSED:
 			print "\n[!] We got a connection refused, the service almost certainly crashed"
-			showPayload(host,port,prot,spattern,length)
+			showPayload(spattern,length)
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
-		showPayload(host,port,prot,spattern,length)
+		showPayload(spattern,length)
 
 ###################################################################################
 
-def sendCredential(sock,command,login,timeout):
+def sendCredential(sock,command,login):
 	try:
 		data = str(command) + " " + str(login) + "\r\n"
 		sock.send(data)
@@ -211,23 +211,23 @@ def createUser():
 
 ###################################################################################
 
-def showPayload(host,port,prot,pattern,length):
-	print "\n########################################"
-	print "\nPayload details:\n================"
-	print "Host: " + host
-	print "Port: " + str(port)
-	print "Type: " + prot
+def showPayload(pattern,length):
+	print "\n######################################################################################"
+	print "\nPayload details:\n================\n"
+	print "Host: " + globalvars.host
+	print "Port: " + str(globalvars.port)
+	print "Type: " + globalvars.plugin_use
 	print "Connection refused at: " + str(length)
-	print "Payload: "
+	print "\nPayload:\n========\n"
 	print pattern
-	print "########################################"
+	print "\n######################################################################################"
 	exitProgram(4)
 
 def printCommand(command):
 	print "\n[!] " + str(command) + " fuzzing ...\n"
 
-def payloadCount(minim,maxm,pos):
-	print "MIN: " + str(minim) + " MAX: " + str(maxm) + " Giving it with: " + str(pos)
+def payloadCount(pos):
+	print "MIN: " + str(globalvars.minim) + " MAX: " + str(globalvars.maxm) + " Giving it with: " + str(pos)
 
 def exitProgram(code):
 	if code==1:
@@ -244,6 +244,13 @@ def exitProgram(code):
 		sys.exit("\n[!] Keyboard Interrupt, exiting ...")
 
 ###################################################################################
+
+# Colors for terminal
+class colors:
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'
 
 def strToInt(convert,typeParam):
 	try:
@@ -266,27 +273,35 @@ def checkMinMax(min,max):
 		print "\n[-] MIN >= MAX"
 		exitProgram(3)
 
+def checkFlavour(flavour):
+	flavour_list = ["Cyclic", "CyclicExtended", "Single", "FormatString"]
+	if flavour not in flavour_list:
+		print "\n[-] Pattern-Flavour " + str(flavour) + " doesn't exist, check help"
+		exitProgram(3)
+
 ###################################################################################
 
+def createPatternSingle(size):
+	return "A" * size
+
+
+def createPatternFormat(size):
+	pattern = ''
+	for cont in range(1,size+1):
+		pattern += "%" + random.choice('snx')
+	return pattern
+
+
 # Taken from mona.py / http://redmine.corelan.be/projects/mona , Copyright (c) 2011, Corelan GCV
-def createPattern(size,args={}):
+def createPatternCyclic(size):
+	
 	char1="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	char2="abcdefghijklmnopqrstuvwxyz"
 	char3="0123456789"
 
-	if "extended" in args:
+	if globalvars.pattern_flavour == "CyclicExtended":
 		char3 += ",.;+=-_!&()#@'({})[]%"	# ascii, 'filename' friendly
 	
-	if "c1" in args:
-		if args["c1"] != "":
-			char1 = args["c1"]
-	if "c2" in args:
-		if args["c2"] != "":
-			char2 = args["c2"]
-	if "c3" in args:
-		if args["c3"] != "":
-			char3 = args["c3"]
-
 	charcnt=0
 	pattern=""
 	max=int(size)
@@ -303,6 +318,18 @@ def createPattern(size,args={}):
 					if charcnt<max:
 						pattern=pattern+ch3
 						charcnt=charcnt+1
+	return pattern
+
+def createPattern(size):
+	
+	Switch = { 
+			"Cyclic":createPatternCyclic,
+			"CyclicExtended":createPatternCyclic,
+			"Single":createPatternSingle,
+			"FormatString":createPatternFormat,
+			}
+	
+	pattern = Switch[globalvars.pattern_flavour](size)
 	return pattern
 
 ###################################################################################

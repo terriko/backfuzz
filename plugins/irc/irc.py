@@ -1,4 +1,3 @@
-import sys
 from functions import *
 """IRC Fuzzer"""
 PROPERTY={}
@@ -22,33 +21,33 @@ stage_2 = ['CAP', 'WHO', 'PRIVMSG']
 numeral_stage = ['JOIN #' , 'MODE #', 'WHO #', 'PRIVMSG #', 'TOPIC #', 'USERS #', 'PART #']
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
+	def fuzzer(self):
 		# Stage 0
-		fuzzTCP(host,port,minim,maxm,salt,timeout,"IRC")
+		fuzzTCP()
 		# Nick Stage
-		sock = createSocketTCP(host,port,"IRC",0,0,timeout)
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,nick_stage,0,"SingleCommand")
+		sock = createSocketTCP(0,0)
+		fuzzCommands(sock,nick_stage,0,"SingleCommand")
 		# User Stages
-		sock = createSocketTCP(host,port,"IRC",0,0,timeout)
-		sendCredential(sock,"NICK","test",timeout)
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,user_stage_1,0,"SingleCommand")
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,user_stage_2,"test3","DoubleCommand")
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,user_stage_3,"test2 test3","DoubleCommand")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,"NICK","test")
+		fuzzCommands(sock,user_stage_1,0,"SingleCommand")
+		fuzzCommands(sock,user_stage_2,"test3","DoubleCommand")
+		fuzzCommands(sock,user_stage_3,"test2 test3","DoubleCommand")
 		# Stage 1
-		sock = createSocketTCP(host,port,"IRC",0,0,timeout)
-		sendCredential(sock,"NICK","test",timeout)
-		sendCredential(sock,"USER ident","test1 test2 test3",timeout)
-		sendCredential(sock,"JOIN","#ctest",timeout)
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,stage_1,0,"SingleCommand")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,"NICK","test")
+		sendCredential(sock,"USER ident","test1 test2 test3")
+		sendCredential(sock,"JOIN","#ctest")
+		fuzzCommands(sock,stage_1,0,"SingleCommand")
 		# Stage 2
-		sock = createSocketTCP(host,port,"IRC",0,0,timeout)
-		sendCredential(sock,"NICK","test",timeout)
-		sendCredential(sock,"USER ident","test1 test2 test3",timeout)
-		sendCredential(sock,"JOIN","#ctest",timeout)
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,stage_2,1,"DoubleCommand")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,"NICK","test")
+		sendCredential(sock,"USER ident","test1 test2 test3")
+		sendCredential(sock,"JOIN","#ctest")
+		fuzzCommands(sock,stage_2,1,"DoubleCommand")
 		# Numeral Stage
-		sock = createSocketTCP(host,port,"IRC",0,0,timeout)
-		sendCredential(sock,"NICK","test",timeout)
-		sendCredential(sock,"USER ident","test1 test2 test3",timeout)
-		fuzzCommands(sock,host,port,"IRC",minim,maxm,salt,timeout,numeral_stage,0,"SingleCommandNoSpace")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,"NICK","test")
+		sendCredential(sock,"USER ident","test1 test2 test3")
+		fuzzCommands(sock,numeral_stage,0,"SingleCommandNoSpace")
 		exitProgram(2)

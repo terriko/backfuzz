@@ -24,46 +24,46 @@ error_opcodes = [(" (Not defined, see error message)" , "0x0000"), (" (File not 
 				 (" (File already exists)" , "0x0006"), (" (No such user)" , "0x0007")]
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
-		fuzzUDP(host,port,minim,maxm,salt,timeout,"TFTP")
+	def fuzzer(self):
+		fuzzUDP()
 		# Stage 1
 		for opcode in stage_1:
 			printCommand(opcode[0])
-			for length in range(minim, maxm+1, salt):
-				payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+				payloadCount(length)
 				pattern = createPattern(length)
 				payload = unhex(opcode[1][2:]) + pattern + unhex(null[1][2:]) + mode[1] + unhex(null[1][2:])
 				spattern = opcode[1] + opcode[0] + " + " + pattern + somefile[0] + " + " + null[1] + null[0] + " + " + mode[1] + mode[0] +  " + " + null[1] + null[0]
-				sock = createSocketUDP(host,port,"TFTP",spattern,length,timeout)
-				sendDataUDP(sock,host,port,"TFTP",payload,spattern,length,timeout,1)
+				sock = createSocketUDP(spattern,length)
+				sendDataUDP(sock,payload,spattern,length,1)
 			printCommand("(Mode) with" + opcode[0])
-			for length in range(minim, maxm+1, salt):
-				payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+				payloadCount(length)
 				pattern = createPattern(length)
 				payload = unhex(opcode[1][2:]) + somefile[1] + unhex(null[1][2:]) + pattern + unhex(null[1][2:])
 				spattern = opcode[1] + opcode[0] + " + " + somefile[1] + somefile[0] +  " + " + null[1] + null[0] + " + " + pattern + mode[0] + " + " + null[1] + null[0]
-				sock = createSocketUDP(host,port,"TFTP",spattern,length,timeout)
-				sendDataUDP(sock,host,port,"TFTP",payload,spattern,length,timeout,1)
+				sock = createSocketUDP(spattern,length)
+				sendDataUDP(sock,payload,spattern,length,1)
 		# Stage 2
 		for opcode in stage_2:
 			printCommand(opcode[0])
-			for length in range(minim, maxm+1, salt):
-				payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+				payloadCount(length)
 				pattern = createPattern(length)
 				payload = unhex(opcode[1][2:]) + unhex(block[1][2:]) + pattern + unhex(null[1][2:])
 				spattern = opcode[1] + opcode[0] + " + " + block[1] + block[0] + " + " + pattern + opcode[0] + " + " + null[1] + null[0]
-				sock = createSocketUDP(host,port,"TFTP",spattern,length,timeout)
-				sendDataUDP(sock,host,port,"TFTP",payload,spattern,length,timeout,1)
+				sock = createSocketUDP(spattern,length)
+				sendDataUDP(sock,payload,spattern,length,1)
 
 		# Stage 3
 		for opcode in stage_3:
 			for error_opcode in error_opcodes:
 				printCommand(opcode[0] + " with" + error_opcode[0])
-				for length in range(minim, maxm+1, salt):
-					payloadCount(minim,maxm,length)
+				for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+					payloadCount(length)
 					pattern = createPattern(length)
 					payload = unhex(opcode[1][2:]) + unhex(error_opcode[1][2:]) + pattern + unhex(null[1][2:])
 					spattern = opcode[1] + opcode[0] + " + " + error_opcode[1] + error_opcode[0] + " + " + pattern + " (Error String)" + " + " + null[1] + null[0]
-					sock = createSocketUDP(host,port,"TFTP",spattern,length,timeout)
-					sendDataUDP(sock,host,port,"TFTP",payload,spattern,length,timeout,1)
+					sock = createSocketUDP(spattern,length)
+					sendDataUDP(sock,payload,spattern,length,1)
 		exitProgram(2)

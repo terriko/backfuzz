@@ -14,22 +14,22 @@ commands = ['ABOR','ACCT','ALLO','APPE','AUTH','CWD','CDUP','DELE','FEAT','HELP'
 
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
+	def fuzzer(self):
 		(username,password) = createUser()
-		fuzzTCP(host,port,minim,maxm,salt,timeout,"FTP")
-		fuzzUser(host,port,minim,maxm,salt,timeout,"USER","FTP")
-		fuzzPass(host,port,minim,maxm,salt,timeout,username,"USER","PASS","FTP")
-		sock = createSocketTCP(host,port,"FTP",0,0,timeout)
-		sendCredential(sock,"USER",username,timeout)
-		sendCredential(sock,"PASS",password,timeout)
+		fuzzTCP()
+		fuzzUser("USER")
+		fuzzPass(username,"USER","PASS")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,"USER",username)
+		sendCredential(sock,"PASS",password)
 		for command in commands:
 			printCommand(command)
-			for length in range(minim, maxm+1, salt):
-				payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+				payloadCount(length)
 				pattern = createPattern(length)
 				pattern = addCommandPattern(command,0,pattern)
-				sock = createSocketTCP(host,port,"FTP",pattern,length,timeout)
-				sendCredential(sock,"USER",username,timeout)
-				sendCredential(sock,"PASS",password,timeout)
-				sendDataTCP(sock,host,port,"FTP",pattern,length,timeout,1)
+				sock = createSocketTCP(pattern,length)
+				sendCredential(sock,"USER",username)
+				sendCredential(sock,"PASS",password)
+				sendDataTCP(sock,pattern,length,1)
 		exitProgram(2)

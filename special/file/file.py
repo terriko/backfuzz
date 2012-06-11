@@ -7,7 +7,7 @@ PROPERTY['DESC']="Generate multiple files with payload"
 PROPERTY['AUTHOR']='localh0t'
 
 class FuzzerClass:
-	def fuzzer(self,minim,maxm,salt,plugin_use):
+	def fuzzer(self):
 		try:
 			directory = raw_input("\n[!] Path to dir where save the files (must exist, Ex: ./fuzzfiles) > ")
 			ext = raw_input("[!] File extension (Ex: .m3u) > ")
@@ -15,7 +15,7 @@ class FuzzerClass:
 			eof = fileInput("[!] Insert a EOF (for each file) (Crtl-C when you're done, or hit now Crtl-C for no EOF) > ")
 		except KeyboardInterrupt:
 			exitProgram(6)
-		for length in range(minim, maxm+1, salt):
+		for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
 			pattern = createPattern(length)
 			pattern = header + pattern + "\n" + eof
 			fileWrite(directory + "/" + "fuzz" + str(length) + ext,pattern)

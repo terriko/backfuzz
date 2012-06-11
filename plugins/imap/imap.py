@@ -1,4 +1,3 @@
-import sys
 from functions import *
 """IMAP Fuzzer"""
 PROPERTY={}
@@ -14,27 +13,27 @@ stage_2 = ['. list', '. status','. rename','. fetch','. store 1','. copy','. lsu
 stage_3 = ['. store']
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
+	def fuzzer(self):
 		(username,password) = createUser()
 		# Stage 0
-		fuzzTCP(host,port,minim,maxm,salt,timeout,"IMAP")
+		fuzzTCP()
 		# User Stage
-		sock = createSocketTCP(host,port,"IMAP",0,0,timeout)
-		fuzzCommands(sock,host,port,"IMAP",minim,maxm,salt,timeout,user_stage,"test","DoubleCommand")
+		sock = createSocketTCP(0,0)
+		fuzzCommands(sock,user_stage,"test","DoubleCommand")
 		# Pass Stage
-		sock = createSocketTCP(host,port,"IMAP",0,0,timeout)
-		fuzzCommands(sock,host,port,"IMAP",minim,maxm,salt,timeout,pass_stage,0,"SingleCommand")
+		sock = createSocketTCP(0,0)
+		fuzzCommands(sock,pass_stage,0,"SingleCommand")
 		# Stage 1
 		login = ". login " + str(username)
-		sock = createSocketTCP(host,port,"IMAP",0,0,timeout)
-		sendCredential(sock,login,password,timeout)
-		fuzzCommands(sock,host,port,"IMAP",minim,maxm,salt,timeout,stage_1,0,"SingleCommand")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,login,password)
+		fuzzCommands(sock,stage_1,0,"SingleCommand")
 		# Stage 2
-		sock = createSocketTCP(host,port,"IMAP",0,0,timeout)
-		sendCredential(sock,login,password,timeout)
-		fuzzCommands(sock,host,port,"IMAP",minim,maxm,salt,timeout,stage_2,1,"DoubleCommand")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,login,password)
+		fuzzCommands(sock,stage_2,1,"DoubleCommand")
 		# Stage 3
-		sock = createSocketTCP(host,port,"IMAP",0,0,timeout)
-		sendCredential(sock,login,password,timeout)
-		fuzzCommands(sock,host,port,"IMAP",minim,maxm,salt,timeout,stage_3,"+flags NonJunk","DoubleCommand")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,login,password)
+		fuzzCommands(sock,stage_3,"+flags NonJunk","DoubleCommand")
 		exitProgram(2)

@@ -9,15 +9,15 @@ PROPERTY['AUTHOR']='localh0t'
 commands = ['STAT','LIST','RETR','DELE','RSET','TOP','TOP 1','RPOP','RPOP test','APOP','APOP test']
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
+	def fuzzer(self):
 		(username,password) = createUser()
-		fuzzTCP(host,port,minim,maxm,salt,timeout,"POP3")
-		fuzzUser(host,port,minim,maxm,salt,timeout,"USER","POP3")
-		fuzzPass(host,port,minim,maxm,salt,timeout,username,"USER","PASS","POP3")
-		sock = createSocketTCP(host,port,"POP3",0,0,timeout)
-		sendCredential(sock,"USER",username,timeout)
-		sendCredential(sock,"PASS",password,timeout)
-		fuzzCommands(sock,host,port,"POP3",minim,maxm,salt,timeout,commands,0,"SingleCommand")
+		fuzzTCP()
+		fuzzUser("USER")
+		fuzzPass(username,"USER","PASS")
+		sock = createSocketTCP(0,0)
+		sendCredential(sock,"USER",username)
+		sendCredential(sock,"PASS",password)
+		fuzzCommands(sock,commands,0,"SingleCommand")
 		exitProgram(2)
 
 

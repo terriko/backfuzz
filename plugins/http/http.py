@@ -24,7 +24,7 @@ headers = [
 ]
 
 class FuzzerClass:
-	def fuzzer(self,host,port,minim,maxm,salt,timeout):
+	def fuzzer(self):
 		# VHOST define
 		try:
 			vhost = raw_input("[!] VHOST you want to use in fuzzer request's (Host:) (default fuzzingh0t.com)> ")
@@ -35,48 +35,48 @@ class FuzzerClass:
 		else:
 			pass
 		# Stage 0
-		fuzzTCP(host,port,minim,maxm,salt,timeout,"HTTP")
+		fuzzTCP()
 		# Commands Stage
 		for command in commands:
 			printCommand(command)
-			for length in range(minim, maxm+1, salt):
-				payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+				payloadCount(length)
 				pattern = createPattern(length)
 				pattern = addDoubleCommandNoSpace(command + " /","HTTP/1.0 \r\n",pattern)
-				sock = createSocketTCP(host,port,"HTTP",pattern,length,timeout)
-				sendDataTCP(sock,host,port,"HTTP",pattern,length,timeout,1)
+				sock = createSocketTCP(pattern,length)
+				sendDataTCP(sock,pattern,length,1)
 		# Host Stage
 		for command in commands:
 			printCommand(command + " => Host: stage")
-			for length in range(minim, maxm+1, salt):
-					payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+					payloadCount(length)
 					pattern = createPattern(length)
 					pattern = addCommandPattern("Host:",0,pattern + "\r\n")
-					sock = createSocketTCP(host,port,"HTTP",pattern,length,timeout)
-					sendCredential(sock,command + " /","HTTP/1.1",timeout)
-					sendDataTCP(sock,host,port,"HTTP",pattern,length,timeout,1)
+					sock = createSocketTCP(pattern,length)
+					sendCredential(sock,command + " /","HTTP/1.1")
+					sendDataTCP(sock,pattern,length,1)
 		# Headers Stage
 		for command in commands:
 			printCommand(command + " => headers stage")
 			for header in headers:
 				printCommand(command + " with " + header)
-				for length in range(minim, maxm+1, salt):
-					payloadCount(minim,maxm,length)
+				for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+					payloadCount(length)
 					pattern = createPattern(length)
 					pattern = addCommandPattern(header,0,pattern + "\r\n")
-					sock = createSocketTCP(host,port,"HTTP",pattern,length,timeout)
-					sendCredential(sock,command + " /","HTTP/1.1",timeout)
-					sendCredential(sock,"Host:",vhost,timeout)
-					sendDataTCP(sock,host,port,"HTTP",pattern,length,timeout,1)
+					sock = createSocketTCP(pattern,length)
+					sendCredential(sock,command + " /","HTTP/1.1")
+					sendCredential(sock,"Host:",vhost)
+					sendDataTCP(sock,pattern,length,1)
 		# Data Stage
 		for command in commands:
 			printCommand(command + " => DATA stage")
-			for length in range(minim, maxm+1, salt):
-				payloadCount(minim,maxm,length)
+			for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
+				payloadCount(length)
 				pattern = createPattern(length) + "\r\n"
-				sock = createSocketTCP(host,port,"HTTP",pattern,length,timeout)
-				sendCredential(sock,command + " /","HTTP/1.1",timeout)
-				sendCredential(sock,"Host:",vhost,timeout)
+				sock = createSocketTCP(pattern,length)
+				sendCredential(sock,command + " /","HTTP/1.1")
+				sendCredential(sock,"Host:",vhost)
 				sendCredential(sock,"Content-Length:",str((len(pattern) -2)) + "\n",timeout)
-				sendDataTCP(sock,host,port,"HTTP",pattern,length,timeout,1)
+				sendDataTCP(sock,pattern,length,1)
 		exitProgram(2)
