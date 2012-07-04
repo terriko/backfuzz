@@ -1,6 +1,8 @@
 import sys,socket,select,time,errno,base64,random,globalvars
 
-###################################################################################
+#################################################################################################################################
+
+# Write "pattern" to "file"
 
 def fileWrite(file,pattern):
 	try:
@@ -10,6 +12,10 @@ def fileWrite(file,pattern):
 	except:
 		print "\n[-] Invalid directory or directory doesn't exist"
 		exitProgram(4)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Prints "message" and do keyboard input unless Ctrl-C
 
 def fileInput(message):
 	print message + "\n"
@@ -21,7 +27,9 @@ def fileInput(message):
 	except KeyboardInterrupt:
 			return user_input
 
-###################################################################################
+###################################################################################################################################
+
+# Creates a payload with ("user" + PAYLOAD) and sends the data to a TCP socket, iterating with the given minim, maxm & salt params
 
 def fuzzUser(user):
 	printCommand(user)
@@ -31,6 +39,11 @@ def fuzzUser(user):
 		pattern = addCommandPattern(user,0,pattern) 
 		sock = createSocketTCP(pattern,length)
 		sendDataTCP(sock,pattern,length,1)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# First, sends ("user" + "username") as an authentication pattern. Then creates a payload with ("passwd" + PAYLOAD) and sends 
+# the data to the same TCP socket, iterating with the given minim, maxm & salt params
 
 def fuzzPass(username,user,passwd):
 	printCommand(passwd)
@@ -42,7 +55,9 @@ def fuzzPass(username,user,passwd):
 		sendCredential(sock,user,username,timeout)
 		sendDataTCP(sock,pattern,length,1)
 
-###################################################################################
+#################################################################################################################################
+
+# Simply it create and fuzz a TCP socket, iterating with the given minim, maxm & salt params
 
 def fuzzTCP():
 		printCommand("TCP Socket")
@@ -52,6 +67,10 @@ def fuzzTCP():
 			sock = createSocketTCP(pattern,length)
 			sendDataTCP(sock,pattern,length,1)
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Simply it create and fuzz a UDP socket, iterating with the given minim, maxm & salt params
+
 def fuzzUDP():
 		printCommand("UDP Socket")
 		for length in range(globalvars.minim, globalvars.maxm+1, globalvars.salt):
@@ -60,7 +79,9 @@ def fuzzUDP():
 			sock = createSocketUDP(pattern,length)
 			sendDataUDP(sock,pattern,pattern,length,1)
 
-###################################################################################
+#################################################################################################################################
+
+# Some different kinda of fusion-pattern's functions, pretty intuitive
 
 def addCommandPattern(command,endcommand,pattern):
     return (str(command) + " " + str(pattern))
@@ -77,6 +98,12 @@ def addDoubleCommand(command,endcommand,pattern):
 def addDoubleCommandNoSpace(command,endcommand,pattern):
     return (str(command) + str(pattern) + " " + str(endcommand))
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# It uses a given alive TCP socket "sock", a given list of "commands" (like ['STAT','LIST', etc]), an optional ending "endcommand"
+# (to use like COMMAND + PATTERN + ENDCOMMAND), and a "type" ("SingleCommand", "Email", "DoubleCommand"  etc.).
+# The main idea of this function is to expand the command's posible combination's, and use a proper one while fuzzing a particular
+# combination. It iterate's with the given minim, maxm & salt params
 
 def fuzzCommands(sock,commands,endcommand,type):
 	for i in range(0,len(commands)):
@@ -98,7 +125,10 @@ def fuzzCommands(sock,commands,endcommand,type):
 				sendDataTCP(sock,pattern,length,0)
 
 
-###################################################################################
+#################################################################################################################################
+
+# Create's a new TCP socket and returns it. If it's not possible to create the socket, something has happened, do some checks and
+# return the propper payload with the showPayload() function, given "pattern" and "length" for that
 
 def createSocketTCP(pattern,length):
 	try:
@@ -116,6 +146,12 @@ def createSocketTCP(pattern,length):
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
 		showPayload(pattern,length)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# It uses a given alive TCP socket "sock", and send's the pattern "pattern" to the same socket. If it's not possible to send
+# the data through the socket, something has happened, do some checks and return the propper payload with the showPayload() 
+# function, given "pattern" and "length" for that. Optionally you can specify to close the socket after sending the data or not.
 
 def sendDataTCP(sock,pattern,length,close):
 	try:
@@ -143,7 +179,11 @@ def sendDataTCP(sock,pattern,length,close):
 		print "[!] Another socket error, the service almost certainly crashed"
 		showPayload(pattern,length)
 
-###################################################################################
+#################################################################################################################################
+
+# Create's a new UDP socket and returns it. If it's not possible to create the socket, something has happened, do some checks and
+# return the propper payload with the showPayload() function, given "pattern" and "length" for that (yes, I know that UDP is
+# definitely not real "connection" oriented, but only for convention)
 
 def createSocketUDP(pattern,length):
 	try:
@@ -161,6 +201,12 @@ def createSocketUDP(pattern,length):
 	except:
 		print "[!] Another socket error, the service almost certainly crashed"
 		showPayload(pattern,length)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# It uses a given UDP socket "sock", and send's the pattern "pattern" to the same socket. If it's not possible to send
+# the data through the socket, something has happened, do some checks and return the propper payload with the showPayload() 
+# function, given "pattern" and "length" for that. Optionally you can specify to close the socket after sending the data or not.
 
 def sendDataUDP(sock,pattern,spattern,length,close):
 	try:
@@ -183,7 +229,9 @@ def sendDataUDP(sock,pattern,spattern,length,close):
 		print "[!] Another socket error, the service almost certainly crashed"
 		showPayload(spattern,length)
 
-###################################################################################
+#################################################################################################################################
+
+# Send's a "command" + "login" data to a given alive socket, for login purposes.
 
 def sendCredential(sock,command,login):
 	try:
@@ -191,6 +239,10 @@ def sendCredential(sock,command,login):
 		sock.send(data)
 	except:
 		exitProgram(5)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# If not "username" / "password" given, use a default one
 
 def checkDefaultUser(username,password):
 	if username == '':
@@ -201,6 +253,10 @@ def checkDefaultUser(username,password):
 		pass
 	return username,password
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Specify a new "username" / "password" combination.
+
 def createUser():
 	try:
 		username = raw_input("[!] Insert username (default: anonymous)> ")
@@ -209,10 +265,12 @@ def createUser():
 		exitProgram(6)
 	return checkDefaultUser(username,password)
 
-###################################################################################
+#################################################################################################################################
+
+# Show payload details, with the correct "pattern" and "length"
 
 def showPayload(pattern,length):
-	print "\n######################################################################################"
+	print "\n#####################################################################################################################################"
 	print "\nPayload details:\n================\n"
 	print "Host: " + globalvars.host
 	print "Port: " + str(globalvars.port)
@@ -220,14 +278,22 @@ def showPayload(pattern,length):
 	print "Connection refused at: " + str(length)
 	print "\nPayload:\n========\n"
 	print pattern
-	print "\n######################################################################################"
+	print "\n#####################################################################################################################################"
 	exitProgram(4)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
 
 def printCommand(command):
 	print "\n[!] " + str(command) + " fuzzing ...\n"
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
 def payloadCount(pos):
 	print "MIN: " + str(globalvars.minim) + " MAX: " + str(globalvars.maxm) + " Giving it with: " + str(pos)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Exit code's
 
 def exitProgram(code):
 	if code==1:
@@ -243,14 +309,18 @@ def exitProgram(code):
 	if code==6:
 		sys.exit("\n[!] Keyboard Interrupt, exiting ...")
 
-###################################################################################
+#################################################################################################################################
 
 # Colors for terminal
 class colors:
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
+	BLUE = '\033[94m'
+	GREEN = '\033[92m'
+	RED = '\033[91m'
+	ENDC = '\033[0m'
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Convert a str variable "convert" to int
 
 def strToInt(convert,typeParam):
 	try:
@@ -260,6 +330,10 @@ def strToInt(convert,typeParam):
 		print "Number given in " + typeParam + " is invalid"
 		exitProgram(3)
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Convert a str variable "convert" to float
+
 def strToFloat(convert,typeParam):
 	try:
 		value = float(convert)
@@ -268,10 +342,16 @@ def strToFloat(convert,typeParam):
 		print "Number given in " + typeParam + " is invalid"
 		exitProgram(3)
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
 def checkMinMax(min,max):
 	if min >= max:
 		print "\n[-] MIN >= MAX"
 		exitProgram(3)
+
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Some check's for invalid pattern's-flavour's
 
 def checkFlavour(flavour):
 	flavour_list = ["Cyclic", "CyclicExtended", "Single", "FormatString"]
@@ -279,11 +359,15 @@ def checkFlavour(flavour):
 		print "\n[-] Pattern-Flavour " + str(flavour) + " doesn't exist, check help"
 		exitProgram(3)
 
-###################################################################################
+#################################################################################################################################
 
+# Create's a single pattern, with the given "size"
 def createPatternSingle(size):
 	return "A" * size
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Create's a format-string-like pattern, with the given "size"
 
 def createPatternFormat(size):
 	pattern = ''
@@ -291,8 +375,11 @@ def createPatternFormat(size):
 		pattern += "%" + random.choice('snx')
 	return pattern
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
 
 # Taken from mona.py / http://redmine.corelan.be/projects/mona , Copyright (c) 2011, Corelan GCV
+# Create's a cyclic pattern, with the given "size"
+
 def createPatternCyclic(size):
 	
 	char1="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -320,6 +407,10 @@ def createPatternCyclic(size):
 						charcnt=charcnt+1
 	return pattern
 
+# ----------------------------------------------------------------------------------------------------------------------------- #
+
+# Switch between the different pattern's
+
 def createPattern(size):
 	
 	Switch = { 
@@ -332,4 +423,4 @@ def createPattern(size):
 	pattern = Switch[globalvars.pattern_flavour](size)
 	return pattern
 
-###################################################################################
+#################################################################################################################################
