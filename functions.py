@@ -52,7 +52,7 @@ def fuzzPass(username,user,passwd):
 		pattern = createPattern(length)
 		pattern = addCommandPattern(passwd,0,pattern)
 		sock = createSocketTCP(pattern,length)
-		sendCredential(sock,user,username,timeout)
+		sendCredential(sock,user,username)
 		sendDataTCP(sock,pattern,length,1)
 
 #################################################################################################################################
