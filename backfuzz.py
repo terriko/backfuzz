@@ -42,8 +42,8 @@ def showHelp():
 	print "\nArguments (Normal Plugins):\n===========================\n"
 	print "-h   [IP]" + colors.RED + " [Required] " + colors.ENDC
 	print "-p   [PORT]" + colors.RED + " [Required] " + colors.ENDC
-	print "-min [START LENGHT]" + colors.RED + " [Required] " + colors.ENDC
-	print "-max [END LENGHT]" + colors.RED + " [Required] " + colors.ENDC
+	print "-min [START LENGTH]" + colors.RED + " [Required] " + colors.ENDC
+	print "-max [END LENGTH]" + colors.RED + " [Required] " + colors.ENDC
 	print "-s   [SALT BETWEEN FUZZ STRINGS]" + colors.RED + " [Required] " + colors.ENDC
 	print "-pl  [PLUGIN TO USE]" + colors.RED + " [Required] " + colors.ENDC
 	print "-pf  [PATTERN-FLAVOUR TO USE (default: Cyclic)]" + colors.GREEN + " [Optional] " + colors.ENDC
@@ -51,8 +51,8 @@ def showHelp():
 	print "\nArguments (Special Plugins):\n============================\n"
 	print "-SPECIAL" + colors.RED + " [Required] " + colors.ENDC
 	print "-pl [SPECIAL PLUGIN TO USE]" + colors.RED + " [Required] " + colors.ENDC
-	print "-min [START LENGHT]" + colors.RED + " [Required] " + colors.ENDC
-	print "-max [END LENGHT]" + colors.RED + " [Required] " + colors.ENDC
+	print "-min [START LENGTH]" + colors.RED + " [Required] " + colors.ENDC
+	print "-max [END LENGTH]" + colors.RED + " [Required] " + colors.ENDC
 	print "-s [SALT BETWEEN FUZZ STRINGS]" + colors.RED + " [Required] " + colors.ENDC
 	print "-pf [PATTERN-FLAVOUR TO USE (default: Cyclic)]" + colors.GREEN + " [Optional] " + colors.ENDC
 	print "\nPattern Flavours are:\n=====================\n"
