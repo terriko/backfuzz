@@ -28,10 +28,13 @@ listadoSpecial.loadPlugins("./special/")
 
 # Start Fuzzer function
 def startFuzzer(object):
+	# uppercase the plugin to facilitate matching
+	globalvars.plugin_use = globalvars.plugin_use.upper()
 	for plugin in object:
 		if plugin.PROPERTY['PROTOCOL'] == globalvars.plugin_use:
 			fuzzmaster = plugin.FuzzerClass()
 			fuzzmaster.fuzzer()
+	print "Invalid protocol specified (" + globalvars.plugin_use + ")"
 
 # Show Help function
 def showHelp():
